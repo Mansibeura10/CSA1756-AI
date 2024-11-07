@@ -1,0 +1,27 @@
+# Function to perform DFS traversal on a graph (recursive)
+def dfs_recursive(graph, node, visited=None):
+    if visited is None:
+        visited = set()  # Initialize the visited set
+
+    # Process the node (e.g., print it)
+    print(node, end=" ")
+    visited.add(node)  # Mark the node as visited
+
+    # Visit all unvisited neighbors
+    for neighbor in graph[node]:
+        if neighbor not in visited:
+            dfs_recursive(graph, neighbor, visited)
+
+# Example graph as an adjacency list
+graph = {
+    'A': ['B', 'C'],
+    'B': ['A', 'D', 'E'],
+    'C': ['A', 'F'],
+    'D': ['B'],
+    'E': ['B', 'F'],
+    'F': ['C', 'E']
+}
+
+# Run DFS from a starting node
+print("DFS traversal starting from node A (recursive):")
+dfs_recursive(graph, 'A')
