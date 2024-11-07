@@ -1,0 +1,64 @@
+from collections import deque
+
+# Define the initial state and goal state
+initial_state = (3, 3, 'left')  # (Missionaries on left, Cannibals on left, Boat position)
+goal_state = (0, 0, 'right')    # (Missionaries on left, Cannibals on left, Boat on right)
+
+# Define the valid moves the boat can make
+moves = [(1, 0), (2, 0), (0, 1), (0, 2), (1, 1)]  # (Missionaries, Cannibals)
+
+# Function to check if the state is valid
+def is_valid_state(m, c):
+    # Ensure no missionaries are outnumbered by cannibals on either bank
+    return (0 <= m <= 3 and 0 <= c <= 3) and (m == 0 or m >= c) and (3 - m == 0 or 3 - m >= 3 - c)
+
+# Function to generate next states
+def get_next_states(state):
+    m, c, boat = state
+    next_states = []
+    
+    for dm, dc in moves:
+        # Calculate the new state based on the boat's movement
+        if boat == 'left':  # Moving from left to right
+            new_state = (m - dm, c - dc, 'right')
+        else:               # Moving from right to left
+            new_state = (m + dm, c + dc, 'left')
+        
+        # Add the new state if it's valid
+        if is_valid_state(new_state[0], new_state[1]):
+            next_states.append(new_state)
+    
+    return next_states
+
+# Function to solve the problem using BFS
+def solve_missionaries_cannibals():
+    queue = deque([(initial_state, [])])  # (Current state, Path to this state)
+    visited = set()
+    
+    while queue:
+        current_state, path = queue.popleft()
+        
+        # If we've reached the goal, return the path
+        if current_state == goal_state:
+            return path + [current_state]
+        
+        # Skip this state if it has been visited
+        if current_state in visited:
+            continue
+        visited.add(current_state)
+        
+        # Generate and queue all next valid states
+        for next_state in get_next_states(current_state):
+            queue.append((next_state, path + [current_state]))
+    
+    return "No solution found"
+
+# Run the solver and print the solution path
+solution = solve_missionaries_cannibals()
+if solution == "No solution found":
+    print(solution)
+else:
+    print("Steps to solve the problem:")
+    for step in solution:
+        m, c, boat = step
+        print(f"Missionaries: {m}, Cannibals: {c}, Boat on: {boat}")
