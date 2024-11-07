@@ -1,0 +1,63 @@
+from collections import deque
+
+# Possible actions
+ACTIONS = ['clean', 'move']
+
+# Define the initial state
+# Format: (Vacuum position, Room A status, Room B status)
+# Room statuses: 1 = dirty, 0 = clean
+initial_state = ('A', 1, 1)  # Vacuum starts in Room A, and both rooms are dirty
+
+# Define the goal state (both rooms clean)
+goal_state = (None, 0, 0)  # Vacuum can be in any room, but both rooms must be clean
+
+# Define the state transition function
+def get_next_states(state):
+    position, room_a, room_b = state
+    next_states = []
+
+    if position == 'A':
+        if room_a == 1:  # Clean Room A if it's dirty
+            next_states.append(('A', 0, room_b))
+        # Move to Room B
+        next_states.append(('B', room_a, room_b))
+    elif position == 'B':
+        if room_b == 1:  # Clean Room B if it's dirty
+            next_states.append(('B', room_a, 0))
+        # Move to Room A
+        next_states.append(('A', room_a, room_b))
+
+    return next_states
+
+# Solve the problem using BFS
+def solve_vacuum_cleaner_problem():
+    queue = deque([(initial_state, [])])  # Queue holds (current state, path to this state)
+    visited = set()
+
+    while queue:
+        current_state, path = queue.popleft()
+
+        # Check if we've reached the goal state
+        if (current_state[1], current_state[2]) == goal_state[1:]:
+            return path + [current_state]  # Return the path to reach the goal
+
+        # Skip the state if it's already been visited
+        if current_state in visited:
+            continue
+        visited.add(current_state)
+
+        # Explore next possible states
+        for next_state in get_next_states(current_state):
+            queue.append((next_state, path + [current_state]))
+
+    return "No solution found"
+
+# Run the solver and display the solution
+solution = solve_vacuum_cleaner_problem()
+if solution == "No solution found":
+    print(solution)
+else:
+    print("Steps to solve the problem:")
+    for step in solution:
+        position, room_a, room_b = step
+        print(f"Vacuum in Room {position}, Room A: {'Dirty' if room_a else 'Clean'}, Room B: {'Dirty' if room_b else 'Clean'}")
