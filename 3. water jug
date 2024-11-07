@@ -1,0 +1,61 @@
+from collections import deque
+
+# Define the capacities and target
+jug1_capacity = 4  # Capacity of the first jug (e.g., 4 liters)
+jug2_capacity = 3  # Capacity of the second jug (e.g., 3 liters)
+target = 2         # Target amount of water to measure
+
+# Function to perform BFS to find the solution
+def water_jug_solver(jug1_capacity, jug2_capacity, target):
+    # Check if it's possible to measure the target amount
+    if target > max(jug1_capacity, jug2_capacity):
+        return "Target amount is more than both jug capacities - No solution"
+
+    # Set to keep track of visited states
+    visited = set()
+    # Queue for BFS, storing tuples in the form (jug1, jug2)
+    queue = deque([(0, 0)])  # Start with both jugs empty
+    # Keep track of the steps to reach the target
+    steps = []
+
+    while queue:
+        jug1, jug2 = queue.popleft()
+
+        # If we've already visited this state, skip it
+        if (jug1, jug2) in visited:
+            continue
+
+        # Mark this state as visited
+        visited.add((jug1, jug2))
+        steps.append((jug1, jug2))
+
+        # Check if we've reached the target
+        if jug1 == target or jug2 == target:
+            steps.append((jug1, jug2))  # Final step
+            return steps  # Return the sequence of steps to reach the solution
+
+        # Possible actions to take
+        possible_moves = [
+            (jug1_capacity, jug2),           # Fill jug1
+            (jug1, jug2_capacity),           # Fill jug2
+            (0, jug2),                       # Empty jug1
+            (jug1, 0),                       # Empty jug2
+            (jug1 - min(jug1, jug2_capacity - jug2), jug2 + min(jug1, jug2_capacity - jug2)),  # Pour jug1 -> jug2
+            (jug1 + min(jug2, jug1_capacity - jug1), jug2 - min(jug2, jug1_capacity - jug1)),  # Pour jug2 -> jug1
+        ]
+
+        # Add all possible moves to the queue
+        for move in possible_moves:
+            if move not in visited:
+                queue.append(move)
+
+    return "No solution found"
+
+# Run the solver and display the solution steps
+solution_steps = water_jug_solver(jug1_capacity, jug2_capacity, target)
+if isinstance(solution_steps, str):
+    print(solution_steps)
+else:
+    print("Steps to reach the target:")
+    for step in solution_steps:
+        print(f"Jug1: {step[0]} liters, Jug2: {step[1]} liters")
