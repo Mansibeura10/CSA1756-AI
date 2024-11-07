@@ -1,0 +1,95 @@
+import heapq
+
+# Define the 8-puzzle goal state
+goal_state = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 0]
+]
+
+# Define movements
+moves = [
+    (0, 1),   # Right
+    (0, -1),  # Left
+    (1, 0),   # Down
+    (-1, 0)   # Up
+]
+
+# Helper function to find the position of a specific tile
+def find_position(state, tile):
+    for i in range(3):
+        for j in range(3):
+            if state[i][j] == tile:
+                return i, j
+
+# Calculate the Manhattan distance heuristic
+def manhattan_distance(state):
+    distance = 0
+    for i in range(3):
+        for j in range(3):
+            tile = state[i][j]
+            if tile != 0:  # Ignore the empty tile
+                goal_i, goal_j = find_position(goal_state, tile)
+                distance += abs(i - goal_i) + abs(j - goal_j)
+    return distance
+
+# Check if the current state is the goal state
+def is_goal(state):
+    return state == goal_state
+
+# Generate possible moves from the current state
+def generate_moves(state):
+    moves_list = []
+    x, y = find_position(state, 0)  # Position of the empty tile
+    for dx, dy in moves:
+        nx, ny = x + dx, y + dy
+        if 0 <= nx < 3 and 0 <= ny < 3:
+            # Create a new state with the tiles swapped
+            new_state = [row[:] for row in state]
+            new_state[x][y], new_state[nx][ny] = new_state[nx][ny], new_state[x][y]
+            moves_list.append(new_state)
+    return moves_list
+
+# A* Search algorithm to solve the puzzle
+def a_star(initial_state):
+    open_list = []
+    heapq.heappush(open_list, (manhattan_distance(initial_state), 0, initial_state, []))
+    visited = set()
+
+    while open_list:
+        _, g, state, path = heapq.heappop(open_list)
+        
+        # Check if the goal is reached
+        if is_goal(state):
+            return path
+        
+        visited.add(tuple(tuple(row) for row in state))
+
+        # Generate and add new moves
+        for next_state in generate_moves(state):
+            next_path = path + [next_state]
+            if tuple(tuple(row) for row in next_state) not in visited:
+                f = g + 1 + manhattan_distance(next_state)
+                heapq.heappush(open_list, (f, g + 1, next_state, next_path))
+                
+    return None  # No solution found
+
+# Example initial state (change this to test different initial configurations)
+initial_state = [
+    [1, 2, 3],
+    [4, 0, 5],
+    [7, 8, 6]
+]
+
+# Run the A* algorithm
+solution_path = a_star(initial_state)
+
+# Print the solution path
+if solution_path:
+    print("Solution found in", len(solution_path), "moves:")
+    for step in solution_path:
+        for row in step:
+            print(row)
+        print()
+else:
+    print("No solution found.")
